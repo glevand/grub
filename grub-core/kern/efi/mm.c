@@ -23,6 +23,10 @@
 #include <grub/efi/efi.h>
 #include <grub/cpu/efi/memory.h>
 
+#if !defined(DEBUG_MAP)
+# define DEBUG_MAP 0
+#endif
+
 #if defined (__i386__) || defined (__x86_64__)
 #include <grub/pci.h>
 #endif
@@ -528,27 +532,27 @@ grub_efi_memory_fini (void)
                            efi_allocated_memory->pages);
 }
 
-#if 0
 /* Print the memory map.  */
 static void
 print_memory_map (grub_efi_memory_descriptor_t *memory_map,
 		  grub_efi_uintn_t desc_size,
 		  grub_efi_memory_descriptor_t *memory_map_end)
 {
-  grub_efi_memory_descriptor_t *desc;
-  int i;
+  if (DEBUG_MAP) {
+    grub_efi_memory_descriptor_t *desc;
+    int i;
 
-  for (desc = memory_map, i = 0;
-       desc < memory_map_end;
-       desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size), i++)
-    {
+    for (desc = memory_map, i = 0;
+         desc < memory_map_end;
+         desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size), i++)
+      {
         grub_printf ("MD: t=%x, p=%" PRIxGRUB_SIZE ", v=%" PRIxGRUB_SIZE
 		   ", n=%" PRIxGRUB_SIZE ", a=%" PRIxGRUB_SIZE "\n",
 		   desc->type, desc->physical_start, desc->virtual_start,
 		   desc->num_pages, desc->attribute);
-    }
+      }
+  }
 }
-#endif
 
 void
 grub_efi_mm_init (void)
@@ -617,18 +621,18 @@ grub_efi_mm_init (void)
   add_memory_regions (filtered_memory_map, desc_size,
 		      filtered_memory_map_end, required_pages);
 
-#if 0
   /* For debug.  */
-  map_size = MEMORY_MAP_SIZE;
+  if (DEBUG_MAP) {
+    map_size = MEMORY_MAP_SIZE;
 
-  if (grub_efi_get_memory_map (&map_size, memory_map, 0, &desc_size, 0) < 0)
-    grub_fatal ("cannot get memory map");
+    if (grub_efi_get_memory_map (&map_size, memory_map, 0, &desc_size, 0) < 0)
+      grub_fatal ("cannot get memory map");
 
-  grub_printf ("printing memory map\n");
-  print_memory_map (memory_map, desc_size,
+    grub_printf ("printing memory map\n");
+    print_memory_map (memory_map, desc_size,
 		    NEXT_MEMORY_DESCRIPTOR (memory_map, map_size));
-  grub_fatal ("Debug. ");
-#endif
+    grub_fatal ("Debug. ");
+  }
 
   /* Release the memory maps.  */
   grub_efi_free_pages ((grub_addr_t) memory_map,
