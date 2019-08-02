@@ -502,7 +502,7 @@ grub_realloc (void *ptr, grub_size_t size)
 }
 
 #ifdef MM_DEBUG
-int grub_mm_debug = 0;
+int grub_mm_debug = 1;
 
 void
 grub_mm_dump_free (void)
