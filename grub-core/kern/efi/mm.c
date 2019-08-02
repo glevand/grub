@@ -24,7 +24,7 @@
 #include <grub/cpu/efi/memory.h>
 
 #if !defined(DEBUG_MAP)
-# define DEBUG_MAP 0
+# define DEBUG_MAP 1
 #endif
 
 #if defined (__i386__) || defined (__x86_64__)
@@ -148,6 +148,8 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
     }
 
   grub_efi_store_alloc (address, pages);
+
+  grub_printf ("%s:%d: %ld@%" PRIxGRUB_SIZE "\n", __func__, __LINE__, pages, address);
 
   return (void *) ((grub_addr_t) address);
 }
@@ -546,9 +548,9 @@ print_memory_map (grub_efi_memory_descriptor_t *memory_map,
          desc < memory_map_end;
          desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size), i++)
       {
-        grub_printf ("MD: t=%x, p=%" PRIxGRUB_SIZE ", v=%" PRIxGRUB_SIZE
-		   ", n=%" PRIxGRUB_SIZE ", a=%" PRIxGRUB_SIZE "\n",
-		   desc->type, desc->physical_start, desc->virtual_start,
+        grub_printf ("MD(%d): type=%x, phy=%" PRIxGRUB_SIZE ", virt=%" PRIxGRUB_SIZE
+		   ", pages=%" PRIxGRUB_SIZE ", attr=%" PRIxGRUB_SIZE "\n",
+		   i, desc->type, desc->physical_start, desc->virtual_start,
 		   desc->num_pages, desc->attribute);
       }
   }
@@ -574,6 +576,7 @@ grub_efi_mm_init (void)
 
   /* Obtain descriptors for available memory.  */
   map_size = MEMORY_MAP_SIZE;
+  grub_printf ("%s:%d: map_size %" PRIxGRUB_SIZE " bytes\n", __func__, __LINE__, map_size);
 
   mm_status = grub_efi_get_memory_map (&map_size, memory_map, 0, &desc_size, 0);
 
@@ -607,11 +610,14 @@ grub_efi_mm_init (void)
   /* By default, request a quarter of the available memory.  */
   total_pages = get_total_pages (filtered_memory_map, desc_size,
 				 filtered_memory_map_end);
+  grub_printf ("%s:%d: total_pages %" PRIxGRUB_SIZE " bytes\n", __func__, __LINE__, total_pages);
   required_pages = (total_pages >> 2);
+  grub_printf ("%s:%d: required_pages1 %" PRIxGRUB_SIZE " bytes\n", __func__, __LINE__, required_pages);
   if (required_pages < BYTES_TO_PAGES (MIN_HEAP_SIZE))
     required_pages = BYTES_TO_PAGES (MIN_HEAP_SIZE);
   else if (required_pages > BYTES_TO_PAGES (MAX_HEAP_SIZE))
     required_pages = BYTES_TO_PAGES (MAX_HEAP_SIZE);
+  grub_printf ("%s:%d: required_pages2 %" PRIxGRUB_SIZE " bytes\n", __func__, __LINE__, required_pages);
 
   /* Sort the filtered descriptors, so that GRUB can allocate pages
      from smaller regions.  */
@@ -631,7 +637,7 @@ grub_efi_mm_init (void)
     grub_printf ("printing memory map\n");
     print_memory_map (memory_map, desc_size,
 		    NEXT_MEMORY_DESCRIPTOR (memory_map, map_size));
-    grub_fatal ("Debug. ");
+	//grub_fatal ("Debug. ");
   }
 
   /* Release the memory maps.  */

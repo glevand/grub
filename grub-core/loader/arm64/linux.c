@@ -255,7 +255,7 @@ grub_cmd_initrd (grub_command_t cmd __attribute__ ((unused)),
     goto fail;
 
   initrd_size = grub_get_initrd_size (&initrd_ctx);
-  grub_dprintf ("linux", "Loading initrd\n");
+  grub_dprintf ("linux", "Loading initrd, size=0x%x\n", initrd_size);
 
   initrd_pages = (GRUB_EFI_BYTES_TO_PAGES (initrd_size));
   initrd_mem = allocate_initrd_mem (initrd_pages);
@@ -266,14 +266,18 @@ grub_cmd_initrd (grub_command_t cmd __attribute__ ((unused)),
       goto fail;
     }
 
-  if (grub_initrd_load (&initrd_ctx, argv, initrd_mem))
-    goto fail;
-
   initrd_start = (grub_addr_t) initrd_mem;
   initrd_end = initrd_start + initrd_size;
-  grub_dprintf ("linux", "[addr=%p, size=0x%x]\n",
+
+  grub_dprintf ("linux", "initrd = [addr=%p, size=0x%x]\n",
 		(void *) initrd_start, initrd_size);
 
+  if (grub_initrd_load (&initrd_ctx, argv, initrd_mem)) {
+    grub_dprintf ("linux", "Loading initrd, FAILED\n");
+    goto fail;
+  }
+
+  grub_dprintf ("linux", "Loading initrd, OK\n");
  fail:
   grub_initrd_close (&initrd_ctx);
   if (initrd_mem && !initrd_start)

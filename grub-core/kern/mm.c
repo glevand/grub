@@ -113,8 +113,8 @@ grub_mm_init_region (void *addr, grub_size_t size)
   grub_mm_header_t h;
   grub_mm_region_t r, *p, q;
 
-#if 0
-  grub_printf ("Using memory for heap: start=%p, end=%p\n", addr, addr + (unsigned int) size);
+#if 1
+  grub_printf ("Using memory for heap: start=%p, end=%p (%llx bytes)\n", addr, (char *)addr + (unsigned int)size, (unsigned long long)size);
 #endif
 
   /* Exclude last 4K to avoid overflows. */
