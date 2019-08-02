@@ -542,7 +542,8 @@ print_memory_map (grub_efi_memory_descriptor_t *memory_map,
        desc < memory_map_end;
        desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size), i++)
     {
-      grub_printf ("MD: t=%x, p=%llx, v=%llx, n=%llx, a=%llx\n",
+        grub_printf ("MD: t=%x, p=%" PRIxGRUB_SIZE ", v=%" PRIxGRUB_SIZE
+		   ", n=%" PRIxGRUB_SIZE ", a=%" PRIxGRUB_SIZE "\n",
 		   desc->type, desc->physical_start, desc->virtual_start,
 		   desc->num_pages, desc->attribute);
     }
