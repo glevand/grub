@@ -225,6 +225,7 @@ allocate_initrd_mem (int initrd_pages)
 
   max_addr += INITRD_MAX_ADDRESS_OFFSET - 1;
 
+  grub_printf ("%s:%d --->", __func__, __LINE__);
   return grub_efi_allocate_pages_real (max_addr, initrd_pages,
 				       GRUB_EFI_ALLOCATE_MAX_ADDRESS,
 				       GRUB_EFI_LOADER_DATA);

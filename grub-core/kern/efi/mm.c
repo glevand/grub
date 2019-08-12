@@ -149,7 +149,12 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
 
   grub_efi_store_alloc (address, pages);
 
-  grub_printf ("%s:%d: %ld@%" PRIxGRUB_SIZE "\n", __func__, __LINE__, pages, address);
+  grub_printf ("%s:%d: 0x%" PRIxGRUB_SIZE " - 0x%" PRIxGRUB_SIZE "\n",
+	__func__, __LINE__, address, address + PAGES_TO_BYTES(pages));
+  grub_printf ("%s:%d:  => 0x%lx (%lu) pages\n",
+	__func__, __LINE__, pages, pages);
+  grub_printf ("%s:%d:  => 0x%lx (%lu) bytes\n",
+	__func__, __LINE__, PAGES_TO_BYTES(pages), PAGES_TO_BYTES(pages));
 
   return (void *) ((grub_addr_t) address);
 }
@@ -157,6 +162,7 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
 void *
 grub_efi_allocate_any_pages (grub_efi_uintn_t pages)
 {
+  grub_printf ("%s:%d --->", __func__, __LINE__);
   return grub_efi_allocate_pages_real (GRUB_EFI_MAX_USABLE_ADDRESS,
 				       pages, GRUB_EFI_ALLOCATE_MAX_ADDRESS,
 				       GRUB_EFI_LOADER_DATA);
@@ -166,6 +172,7 @@ void *
 grub_efi_allocate_fixed (grub_efi_physical_address_t address,
 			 grub_efi_uintn_t pages)
 {
+  grub_printf ("%s:%d --->", __func__, __LINE__);
   return grub_efi_allocate_pages_real (address, pages,
 				       GRUB_EFI_ALLOCATE_ADDRESS,
 				       GRUB_EFI_LOADER_DATA);
@@ -501,6 +508,7 @@ add_memory_regions (grub_efi_memory_descriptor_t *memory_map,
 	  pages = required_pages;
 	}
 
+      grub_printf ("%s:%d --->", __func__, __LINE__);
       addr = grub_efi_allocate_pages_real (start, pages,
 					   GRUB_EFI_ALLOCATE_ADDRESS,
 					   GRUB_EFI_LOADER_CODE);      
